@@ -13,21 +13,20 @@ export default function JoinPage() {
 
     localStorage.setItem('user_name', name)
 
-  const { error } = await supabase.auth.signInWithOtp({
-  email,
-  options: {
-    emailRedirectTo: 'https://21-strong.vercel.app/dashboard'
-    
-      ,
-  },
-})
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo:
+          'https://21-strong.vercel.app/dashboard',
+      },
+    })
 
     if (error) {
       setMessage(error.message)
       console.error(error)
     } else {
       setMessage(
-        'Check your email for your login link.'
+        'Check your email and tap the link to sign in.'
       )
     }
   }
@@ -69,7 +68,7 @@ export default function JoinPage() {
             type="submit"
             className="w-full bg-purple-600 p-3 rounded"
           >
-            TEST BUTTON
+            Send Login Link
           </button>
         </form>
 

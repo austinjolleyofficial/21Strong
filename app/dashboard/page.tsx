@@ -213,7 +213,10 @@ setUnreadNotifications(count || 0)
     commitment_id: todayCommitmentId,
   })
   .select()
-
+if (postError) {
+  alert('POST ERROR: ' + postError.message)
+  console.log(postError)
+}
 
   setCompleted(true)
   setCompletedDays(newCompletedDays)

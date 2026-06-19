@@ -31,13 +31,32 @@ const { count } = await supabase
   .eq('is_read', false)
 
 setUnreadNotifications(count || 0)
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
+  let { data: profile } = await supabase
+  .from('profiles')
+  .select('*')
+  .eq('id', user.id)
+  .single()
 
-    if (!profile) return
+if (!profile) {
+  const userName =
+    localStorage.getItem('user_name') ||
+    '21 Strong Member'
+
+  const { data: newProfile } = await supabase
+    .from('profiles')
+    .insert({
+      id: user.id,
+      name: userName,
+      completed_days: 0,
+      current_day: 1,
+      current_streak: 0,
+      graduated: false,
+    })
+    .select()
+    .single()
+
+  profile = newProfile
+}
 
     const progress = profile.completed_days || 0
     const day = progress + 1

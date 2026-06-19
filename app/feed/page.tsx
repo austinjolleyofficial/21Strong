@@ -204,6 +204,26 @@ alert(
         padding: '40px',
       }}
     >
+      <div
+  style={{
+    display: 'flex',
+    gap: '20px',
+    marginBottom: '30px',
+  }}
+>
+  <a href="/feed">Feed</a>
+  <a href="/dashboard">Dashboard</a>
+  <a href="/history">History</a>
+
+  <button
+    onClick={async () => {
+      await supabase.auth.signOut()
+      window.location.href = '/join'
+    }}
+  >
+    Logout
+  </button>
+</div>
       <h1
         style={{
           color: '#9333ea',

@@ -16,8 +16,8 @@ export default function JoinPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo:
-          'https://21-strong.vercel.app/dashboard',
+      emailRedirectTo:
+'https://21-strong.vercel.app/feed' ,
       },
     })
 

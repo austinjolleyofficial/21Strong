@@ -42,18 +42,28 @@ if (!profile) {
     localStorage.getItem('user_name') ||
     '21 Strong Member'
 
-  const { data: newProfile } = await supabase
-    .from('profiles')
-    .insert({
-      id: user.id,
-      name: userName,
-      completed_days: 0,
-      current_day: 1,
-      current_streak: 0,
-      graduated: false,
-    })
-    .select()
-    .single()
+  const { data: newProfile, error } =
+    await supabase
+      .from('profiles')
+      .insert({
+        id: user.id,
+        name: userName,
+        status: 'active',
+        current_day: 1,
+        current_streak: 0,
+        completed_days: 0,
+        joined_at: new Date().toISOString(),
+        challenge_start_date:
+          new Date().toISOString(),
+        graduated: false,
+      })
+      .select()
+      .single()
+
+  if (error) {
+    alert(error.message)
+    return
+  }
 
   profile = newProfile
 }

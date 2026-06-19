@@ -266,11 +266,19 @@ if (!profile) {
         alignItems: 'center',
       }}
     >
-      <div
+<div
   style={{
+    position: 'fixed',
+    top: '10px',
+    left: '10px',
+    right: '10px',
     display: 'flex',
-    gap: '20px',
-    marginBottom: '30px',
+    justifyContent: 'center',
+    gap: '15px',
+    flexWrap: 'wrap',
+    zIndex: 1000,
+    background: '#000',
+    padding: '10px',
   }}
 >
   <a href="/feed">Feed</a>
@@ -286,7 +294,13 @@ if (!profile) {
     Logout
   </button>
 </div>
-      <div style={{ width: '600px' }}>
+    <div
+  style={{
+    width: '600px',
+    maxWidth: '95%',
+    marginTop: '80px',
+  }}
+>
     <div
   style={{
     display: 'flex',

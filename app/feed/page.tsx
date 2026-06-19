@@ -127,14 +127,22 @@ const addComment = async (
     .eq('id', user.id)
     .single()
 
-  const { error } = await supabase
-    .from('comments')
-    .insert({
-      user_id: user.id,
-      post_id: postId,
-      comment,
-      name: profile?.name || 'Anonymous',
-    })
+ const { data, error } = await supabase
+  .from('comments')
+  .insert({
+    user_id: user.id,
+    post_id: postId,
+    comment,
+    name: profile?.name || 'Anonymous',
+  })
+  .select()
+
+alert(
+  JSON.stringify({
+    data,
+    error,
+  })
+)
 
   if (error) {
     alert(error.message)

@@ -34,7 +34,9 @@ export default function Feed() {
       })
 
     setPosts(data || [])
-
+console.log(
+  JSON.stringify(data, null, 2)
+)
     const { data: reactionData } = await supabase
       .from('reactions')
       .select('*')

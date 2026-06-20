@@ -1,5 +1,5 @@
 'use client'
-// test
+
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
@@ -13,33 +13,45 @@ export default function Feed() {
   }, [])
 
   const loadFeed = async () => {
-const { data, error } = await supabase
-  .from('posts')
-  .select(`
-    *,
-    profiles!posts_user_id_fkey (
-      name
-    ),
-  commitments!posts_commitment_id_fkey (
-  id,
-  commitment,
-  day_number,
-proofs (
-  photo_url
-)
-)
-  `)
-  .order('created_at', {
-    ascending: false,
-  })
+    const { data, error } = await supabase
+      .from('posts')
+      .select(`
+        *,
+        profiles!posts_user_id_fkey (
+          name
+        ),
+        commitments!posts_commitment_id_fkey (
+          id,
+          commitment,
+          day_number
+        )
+      `)
+      .order('created_at', {
+        ascending: false,
+      })
 
-console.log('POSTS:', data)
-console.log('POST ERROR:', error)
+    const { data: proofData } = await supabase
+      .from('proofs')
+      .select('*')
 
-setPosts(data || [])
-console.log(
-  JSON.stringify(data, null, 2)
-)
+    console.log('POSTS:', data)
+    console.log('PROOFS:', proofData)
+    console.log('POST ERROR:', error)
+
+    const postsWithProofs = (data || []).map(
+      (post) => ({
+        ...post,
+        proof:
+          proofData?.find(
+            (p) =>
+              p.commitment_id ===
+              post.commitment_id
+          ) || null,
+      })
+    )
+
+    setPosts(postsWithProofs)
+
     const { data: reactionData } = await supabase
       .from('reactions')
       .select('*')
@@ -247,9 +259,9 @@ console.log(
             {post.commitments?.commitment}
           </p>
 
-          {post.commitments?.proofs?.[0]?.photo_url && (
+          {post.proof?.proof_url && (
             <img
-              src={post.commitments.proofs[0].photo_url}
+              src={post.proof.proof_url}
               alt="Proof"
               style={{
                 width: '100%',

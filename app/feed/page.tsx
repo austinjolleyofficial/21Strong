@@ -41,19 +41,14 @@ export default function Feed() {
 
     setReactions(reactionData || [])
 
-const { data: commentData, error: commentError } =
-  await supabase
-    .from('comments')
-    .select('*')
-    .order('created_at', {
-      ascending: true,
-    })
-
-console.log('COMMENTS:', commentData)
-console.log('COMMENT ERROR:', commentError)
+    const { data: commentData } = await supabase
+      .from('comments')
+      .select('*')
+      .order('created_at', {
+        ascending: true,
+      })
 
     setComments(commentData || [])
-  
   }
 
   const reactToPost = async (
@@ -75,116 +70,87 @@ console.log('COMMENT ERROR:', commentError)
       })
 
     if (error?.code === '23505') {
-  return
-}
+      return
+    }
 
-if (error) {
-  alert(error.message)
-  return
-}
+    if (error) {
+      alert(error.message)
+      return
+    }
 
-const { data: post } = await supabase
-  .from('posts')
-  .select('user_id')
-  .eq('id', postId)
-  .single()
+    const { data: post } = await supabase
+      .from('posts')
+      .select('user_id')
+      .eq('id', postId)
+      .single()
 
-const { data: profile } = await supabase
-  .from('profiles')
-  .select('name')
-  .eq('id', user.id)
-  .single()
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single()
 
-if (
-  post &&
-  post.user_id !== user.id
-) {
-  await supabase
-    .from('notifications')
-    .insert({
-      user_id: post.user_id,
-      actor_name: profile?.name,
-      message: `${profile?.name} reacted ${emoji} to your post`,
-    })
-}
+    if (post && post.user_id !== user.id) {
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: post.user_id,
+          actor_name: profile?.name,
+          message: `${profile?.name} reacted ${emoji} to your post`,
+        })
+    }
 
-await loadFeed()
+    await loadFeed()
   }
 
-const addComment = async (
-  postId: string,
-  comment: string
-) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const addComment = async (
+    postId: string,
+    comment: string
+  ) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  if (!user) return
+    if (!user) return
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('name')
-    .eq('id', user.id)
-    .single()
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single()
 
- const { data, error } = await supabase
-  .from('comments')
-  .insert({
-    user_id: user.id,
-    post_id: postId,
-    comment,
-    name: profile?.name || 'Anonymous',
-  })
-  .select()
+    const { error } = await supabase
+      .from('comments')
+      .insert({
+        user_id: user.id,
+        post_id: postId,
+        comment,
+        name: profile?.name || 'Anonymous',
+      })
 
-alert(
-  JSON.stringify({
-    data,
-    error,
-  })
-)
+    if (error) {
+      alert(error.message)
+      return
+    }
 
-  if (error) {
-    alert(error.message)
-    return
+    const { data: post } = await supabase
+      .from('posts')
+      .select('user_id')
+      .eq('id', postId)
+      .single()
+
+    if (post && post.user_id !== user.id) {
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: post.user_id,
+          actor_name: profile?.name,
+          message: `${profile?.name} commented on your post`,
+        })
+    }
+
+    await loadFeed()
   }
-
-  const { data: post } = await supabase
-    .from('posts')
-    .select('user_id')
-    .eq('id', postId)
-    .single()
-
-  if (
-    post &&
-    post.user_id !== user.id
-  ) {
-  
-const { data, error: notificationError } =
-  await supabase
-    .from('notifications')
-    .insert({
-      user_id: post.user_id,
-      actor_name: profile?.name,
-      message: `${profile?.name} commented on your post`,
-    })
-    .select()
-
-alert(
-  JSON.stringify({
-    data,
-    notificationError,
-  })
-)
-
-    console.log(
-      'NOTIFICATION ERROR:',
-      notificationError
-    )
-  }
-
-  await loadFeed()
-}
 
   const getReactionCount = (
     postId: string,
@@ -213,25 +179,26 @@ alert(
       }}
     >
       <div
-  style={{
-    display: 'flex',
-    gap: '20px',
-    marginBottom: '30px',
-  }}
->
-  <a href="/feed">Feed</a>
-  <a href="/dashboard">Dashboard</a>
-  <a href="/history">History</a>
+        style={{
+          display: 'flex',
+          gap: '20px',
+          marginBottom: '30px',
+        }}
+      >
+        <a href="/feed">Feed</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/history">History</a>
 
-  <button
-    onClick={async () => {
-      await supabase.auth.signOut()
-      window.location.href = '/join'
-    }}
-  >
-    Logout
-  </button>
-</div>
+        <button
+          onClick={async () => {
+            await supabase.auth.signOut()
+            window.location.href = '/join'
+          }}
+        >
+          Logout
+        </button>
+      </div>
+
       <h1
         style={{
           color: '#9333ea',
@@ -259,14 +226,10 @@ alert(
               marginBottom: '10px',
             }}
           >
-            {post.profiles?.name}
+            {post.profiles?.name || '21 Strong Member'}
           </h2>
 
-          <p
-            style={{
-              fontWeight: 'bold',
-            }}
-          >
+          <p style={{ fontWeight: 'bold' }}>
             Day {post.commitments?.day_number}
           </p>
 
@@ -279,13 +242,9 @@ alert(
             {post.commitments?.commitment}
           </p>
 
-          {post.commitments?.proofs?.[0]
-            ?.proof_url && (
+          {post.commitments?.proofs?.[0]?.proof_url && (
             <img
-              src={
-                post.commitments.proofs[0]
-                  .proof_url
-              }
+              src={post.commitments.proofs[0].proof_url}
               alt="Proof"
               style={{
                 width: '100%',
@@ -317,36 +276,25 @@ alert(
                 <button
                   key={emoji}
                   onClick={() =>
-                    reactToPost(
-                      post.id,
-                      emoji
-                    )
+                    reactToPost(post.id, emoji)
                   }
                   style={{
                     background: '#111',
                     color: '#fff',
-                    border:
-                      '1px solid #333',
+                    border: '1px solid #333',
                     borderRadius: '8px',
                     padding: '8px 12px',
                     cursor: 'pointer',
                   }}
                 >
                   {emoji}{' '}
-                  {getReactionCount(
-                    post.id,
-                    emoji
-                  )}
+                  {getReactionCount(post.id, emoji)}
                 </button>
               )
             )}
           </div>
 
-          <div
-            style={{
-              marginTop: '20px',
-            }}
-          >
+          <div style={{ marginTop: '20px' }}>
             <input
               id={`comment-${post.id}`}
               placeholder="Encourage someone..."
@@ -369,11 +317,7 @@ alert(
 
                 if (!input.value) return
 
-                addComment(
-                  post.id,
-                  input.value
-                )
-
+                addComment(post.id, input.value)
                 input.value = ''
               }}
               style={{
@@ -382,8 +326,7 @@ alert(
                 color: '#fff',
                 border: 'none',
                 borderRadius: '8px',
-                padding:
-                  '10px 16px',
+                padding: '10px 16px',
                 cursor: 'pointer',
               }}
             >
@@ -391,38 +334,30 @@ alert(
             </button>
           </div>
 
-          <div
-            style={{
-              marginTop: '20px',
-            }}
-          >
-  {getComments(post.id).map(
-  (comment) => (
-    <div
-      key={comment.id}
-      style={{
-        background: '#0a0a0a',
-        padding: '10px',
-        borderRadius: '8px',
-        marginBottom: '10px',
-      }}
-    >
-      <div
-        style={{
-          color: '#9333ea',
-          fontWeight: 'bold',
-          marginBottom: '5px',
-        }}
-      >
-        {comment.name}
-      </div>
+          <div style={{ marginTop: '20px' }}>
+            {getComments(post.id).map((comment) => (
+              <div
+                key={comment.id}
+                style={{
+                  background: '#0a0a0a',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  marginBottom: '10px',
+                }}
+              >
+                <div
+                  style={{
+                    color: '#9333ea',
+                    fontWeight: 'bold',
+                    marginBottom: '5px',
+                  }}
+                >
+                  {comment.name}
+                </div>
 
-      <div>
-        {comment.comment}
-      </div>
-    </div>
-  )
-)}
+                <div>{comment.comment}</div>
+              </div>
+            ))}
           </div>
         </div>
       ))}

@@ -1,5 +1,5 @@
 'use client'
-
+// test
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
@@ -20,11 +20,14 @@ const { data, error } = await supabase
     profiles!posts_user_id_fkey (
       name
     ),
-    commitments!posts_commitment_id_fkey (
-      id,
-      commitment,
-      day_number
-    )
+  commitments!posts_commitment_id_fkey (
+  id,
+  commitment,
+  day_number,
+  proofs (
+    proof_url
+  )
+)
   `)
   .order('created_at', {
     ascending: false,
@@ -34,6 +37,9 @@ console.log('POSTS:', data)
 console.log('POST ERROR:', error)
 
 setPosts(data || [])
+console.log(
+  JSON.stringify(data, null, 2)
+)
     const { data: reactionData } = await supabase
       .from('reactions')
       .select('*')

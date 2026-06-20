@@ -13,30 +13,27 @@ export default function Feed() {
   }, [])
 
   const loadFeed = async () => {
-    const { data } = await supabase
-      .from('posts')
-      .select(`
-        *,
-        profiles (
-          name
-        ),
-        commitments (
-          id,
-          commitment,
-          day_number,
-          proofs (
-            proof_url
-          )
-        )
-      `)
-      .order('created_at', {
-        ascending: false,
-      })
+const { data, error } = await supabase
+  .from('posts')
+  .select(`
+    *,
+    profiles!posts_user_id_fkey (
+      name
+    ),
+    commitments!posts_commitment_id_fkey (
+      id,
+      commitment,
+      day_number
+    )
+  `)
+  .order('created_at', {
+    ascending: false,
+  })
 
-    setPosts(data || [])
-console.log(
-  JSON.stringify(data, null, 2)
-)
+console.log('POSTS:', data)
+console.log('POST ERROR:', error)
+
+setPosts(data || [])
     const { data: reactionData } = await supabase
       .from('reactions')
       .select('*')

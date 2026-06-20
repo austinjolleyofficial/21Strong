@@ -24,9 +24,9 @@ const { data, error } = await supabase
   id,
   commitment,
   day_number,
-  proofs (
-    proof_url
-  )
+proofs (
+  photo_url
+)
 )
   `)
   .order('created_at', {
@@ -247,9 +247,9 @@ console.log(
             {post.commitments?.commitment}
           </p>
 
-          {post.commitments?.proofs?.[0]?.proof_url && (
+          {post.commitments?.proofs?.[0]?.photo_url && (
             <img
-              src={post.commitments.proofs[0].proof_url}
+              src={post.commitments.proofs[0].photo_url}
               alt="Proof"
               style={{
                 width: '100%',

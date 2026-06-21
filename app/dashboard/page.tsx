@@ -68,11 +68,13 @@ if (!profile) {
   profile = newProfile
 }
 
-    const progress = profile.completed_days || 0
-    const day = progress + 1
+  setCompletedDays(
+  profile.completed_days || 0
+)
 
-    setCompletedDays(progress)
-    setCurrentDay(day)
+setCurrentDay(
+  profile.current_day || 1
+)
 
     const { data: allCommitments } = await supabase
       .from('commitments')
@@ -81,12 +83,12 @@ if (!profile) {
 
     setCommitments(allCommitments || [])
 
-    const { data: todayCommitment } = await supabase
-      .from('commitments')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('day_number', day)
-      .maybeSingle()
+   const { data: todayCommitment } = await supabase
+  .from('commitments')
+  .select('*')
+  .eq('user_id', user.id)
+  .eq('day_number', profile.current_day || 1)
+  .maybeSingle()
 
     if (todayCommitment) {
       setCommitment(todayCommitment.commitment)
@@ -138,7 +140,12 @@ if (!profile) {
       })
       .select()
       .single()
-
+alert(
+  JSON.stringify({
+    data,
+    error,
+  })
+)
     if (error) {
       alert(error.message)
       return

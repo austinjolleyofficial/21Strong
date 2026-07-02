@@ -198,66 +198,59 @@ alert(
     alert('Proof uploaded')
   }
 
- const completeCommitment = async () => {
+const completeCommitment = async () => {
   if (!proofUrl) {
     alert('Upload proof first')
     return
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
   if (!user || !todayCommitmentId) return
 
-  const { error } = await supabase
+  const { error: commitmentError } = await supabase
     .from('commitments')
     .update({ completed: true })
     .eq('id', todayCommitmentId)
 
-  if (error) {
-    alert(error.message)
+  if (commitmentError) {
+    alert('Commitment error: ' + commitmentError.message)
     return
   }
 
- const newCompletedDays =
-  Math.min(completedDays + 1, 21)
+  const newCompletedDays = Math.min(completedDays + 1, 21)
 
- await supabase
-  .from('profiles')
-  .update({
-    completed_days: newCompletedDays,
-    current_day:
-      newCompletedDays >= 21
-        ? 21
-        : newCompletedDays + 1,
-    current_streak: newCompletedDays,
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update({
+      completed_days: newCompletedDays,
+      current_day: newCompletedDays >= 21 ? 21 : newCompletedDays + 1,
+      current_streak: newCompletedDays,
+      graduated: newCompletedDays >= 21,
+      graduated_at: newCompletedDays >= 21 ? new Date().toISOString() : null,
+    })
+    .eq('id', user.id)
 
-    graduated:
-      newCompletedDays >= 21,
+  if (profileError) {
+    alert('Profile error: ' + profileError.message)
+    return
+  }
 
-    graduated_at:
-      newCompletedDays >= 21
-        ? new Date().toISOString()
-        : null,
-  })
-  .eq('id', user.id)
-    const { data: postData, error: postError } = await supabase
-  .from('posts')
-  .insert({
-    user_id: user.id,
-    commitment_id: todayCommitmentId,
-  })
-  .select()
+  const { error: postError } = await supabase
+    .from('posts')
+    .insert({
+      user_id: user.id,
+      commitment_id: todayCommitmentId,
+    })
 
+  if (postError) {
+    alert('Post error: ' + postError.message)
+    return
+  }
 
   setCompleted(true)
   setCompletedDays(newCompletedDays)
- setCurrentDay(
-  newCompletedDays >= 21
-    ? 21
-    : newCompletedDays + 1
-)
+  setCurrentDay(newCompletedDays >= 21 ? 21 : newCompletedDays + 1)
 
   alert(`Progress: ${newCompletedDays}/21 completed`)
 }
